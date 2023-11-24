@@ -12,6 +12,10 @@
 
 (function() {
     'use strict';
+    $(()=>{
+        
+        console.log("已加载完成")
 
+    })
     // Your code here...
 })();
