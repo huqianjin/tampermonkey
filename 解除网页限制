@@ -1,0 +1,71 @@
+// ==UserScript==
+// @name         解除网页限制
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  解除网页对选中文字、复制文字、粘贴文字、全屏检测、切屏检测、激活窗口检测的限制
+// @author       You
+// @match        https://cedu.wuhanrt.com/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=wuhanrt.com
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // 解除选中文字和复制文字的限制
+    document.addEventListener('contextmenu', function(e) {
+        e.stopPropagation();
+    }, true);
+
+    document.onselectstart = function() { return true; };
+    document.body.onselectstart = function() { return true; };
+    document.onmousedown = function() { return true; };
+    document.body.onmousedown = function() { return true; };
+    document.onmouseup = function() { return true; };
+    document.body.onmouseup = function() { return true; };
+    document.onmousemove = function() { return true; };
+    document.body.onmousemove = function() { return true; };
+    document.oncopy = function() { return true; };
+
+    // 解除粘贴到输入框的限制
+    document.querySelectorAll('input, textarea').forEach(function(input) {
+        input.addEventListener('paste', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            var clipboardData = e.clipboardData || window.clipboardData;
+            this.value += clipboardData.getData('Text');
+        });
+    });
+
+    // 禁止网页检测用户是否全屏、是否切屏、是否为激活窗口
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
+
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+        if (type === 'visibilitychange' || type === 'fullscreenchange' || type === 'focus' || type === 'blur') {
+            return;
+        }
+        originalAddEventListener.call(this, type, listener, options);
+    };
+
+    EventTarget.prototype.removeEventListener = function(type, listener, options) {
+        if (type === 'visibilitychange' || type === 'fullscreenchange' || type === 'focus' || type === 'blur') {
+            return;
+        }
+        originalRemoveEventListener.call(this, type, listener, options);
+    };
+
+    // 解除CSS中的user-select限制
+    const style = document.createElement('style');
+    style.innerHTML = `
+        * {
+            -webkit-user-select: auto !important;
+            -khtml-user-select: auto !important;
+            -moz-user-select: auto !important;
+            -ms-user-select: auto !important;
+            user-select: auto !important;
+        }
+    `;
+    document.head.appendChild(style);
+
+})();
